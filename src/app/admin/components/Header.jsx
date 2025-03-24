@@ -1,9 +1,22 @@
-
+'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faBell, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+
+// MUI Imports
+import {
+  AppBar,
+  Toolbar,
+  IconButton,
+  Typography,
+  Badge,
+  Box,
+} from '@mui/material';
+import {
+  Menu as MenuIcon,
+  Notifications as NotificationsIcon,
+  Mail as MailIcon,
+} from '@mui/icons-material';
 
 const Header = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -26,42 +39,70 @@ const Header = () => {
   }
 
   return (
-    <header className="flex items-center justify-between bg-gray-700 p-3">
-      <div className="flex items-center">
-        <button className="text-white text-xl px-2">
-          {/* <FontAwesomeIcon icon={faBars} /> */}
-        </button>
-        <div className="flex items-center ml-4">
-          {/* <Image className='rounded-full'
-            src="/ali.png"
-            alt="Pluto Logo"
-            width={40}
-            height={40}
-          /> */}
-          <span className="text-white text-2xl font-semibold ml-2">Store2u</span>
-        </div>
-      </div>
-      <div className="flex items-center space-x-6">
-        {/* <div className="relative text-white">
-          <FontAwesomeIcon icon={faBell} />
-          <span className="absolute top-0 right-3 h-4 w-4 bg-red-500 text-xs flex items-center justify-center rounded-full">2</span>
-        </div>
-        <div className="relative text-white">
-          <FontAwesomeIcon icon={faEnvelope} />
-          <span className="absolute top-0 right-3 h-4 w-4 bg-red-500 text-xs flex items-center justify-center rounded-full">3</span>
-        </div> */}
-        <div className="flex items-center">
-          {/* <Image
-            src="/ali.png"
-            alt="Profile Picture"
-            width={40}
-            height={40}
-            className="rounded-full"
-          /> */}
-          <span className="text-white text-lg ml-2">Admin</span>
-        </div>
-      </div>
-    </header>
+    <AppBar position="static" sx={{ bgcolor: '#374151' }}>
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', px: 3 }}>
+        {/* Left Section */}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <IconButton color="inherit" aria-label="menu" sx={{ p: 1 }}>
+            {/* Uncomment to include the menu icon */}
+            {/* <MenuIcon /> */}
+          </IconButton>
+          <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
+            {/* Uncomment to include the logo */}
+            {/* <Image
+              src="/ali.png"
+              alt="Pluto Logo"
+              width={40}
+              height={40}
+              style={{ borderRadius: '50%' }}
+            /> */}
+            <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', ml: 1 }}>
+              Store2u
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Right Section */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          {/* Notifications - Uncomment to include */}
+          {/* <Badge
+            badgeContent={2}
+            color="error"
+            sx={{ '& .MuiBadge-badge': { width: 16, height: 16, minWidth: 16 } }}
+          >
+            <IconButton color="inherit" aria-label="notifications">
+              <NotificationsIcon />
+            </IconButton>
+          </Badge> */}
+
+          {/* Messages - Uncomment to include */}
+          {/* <Badge
+            badgeContent={3}
+            color="error"
+            sx={{ '& .MuiBadge-badge': { width: 16, height: 16, minWidth: 16 } }}
+          >
+            <IconButton color="inherit" aria-label="messages">
+              <MailIcon />
+            </IconButton>
+          </Badge> */}
+
+          {/* Profile */}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {/* Uncomment to include the profile picture */}
+            {/* <Image
+              src="/ali.png"
+              alt="Profile Picture"
+              width={40}
+              height={40}
+              style={{ borderRadius: '50%' }}
+            /> */}
+            <Typography variant="body1" sx={{ color: 'white', ml: 1 }}>
+              Admin
+            </Typography>
+          </Box>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 

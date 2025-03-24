@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Table,
   TableContainer,
@@ -21,12 +21,16 @@ import {
   Alert,
   IconButton,
   TablePagination,
-} from "@mui/material";
-import { useTable, useGlobalFilter, useSortBy, usePagination } from "react-table";
-import { FaUserEdit } from "react-icons/fa";
-import { MdDeleteForever } from "react-icons/md";
-import CloseIcon from "@mui/icons-material/Close";
-import axios from "axios";
+  Box,
+  Typography,
+  CircularProgress,
+} from '@mui/material';
+import { useTable, useGlobalFilter, useSortBy, usePagination } from 'react-table';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
+import SearchIcon from '@mui/icons-material/Search';
+import axios from 'axios';
 
 const FAQ = () => {
   const [faqs, setFaqs] = useState([]);
@@ -35,17 +39,18 @@ const FAQ = () => {
   const [editingFaq, setEditingFaq] = useState(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
-    message: "",
-    type: "",
+    message: '',
+    type: '',
   });
   const [deleteConfirmation, setDeleteConfirmation] = useState({
     open: false,
     id: null,
   });
+  const [isLoading, setIsLoading] = useState(false); // Added for loading state
 
   const [formData, setFormData] = useState({
-    question: "",
-    answer: "",
+    question: '',
+    answer: '',
   });
 
   useEffect(() => {
@@ -53,23 +58,26 @@ const FAQ = () => {
   }, []);
 
   const fetchFaqs = async () => {
+    setIsLoading(true);
     try {
-      const response = await axios.get("/api/faq");
+      const response = await axios.get('/api/faq');
       setFaqs(response.data);
     } catch (error) {
-      console.error("Error fetching FAQs:", error);
+      console.error('Error fetching FAQs:', error);
       setSnackbar({
         open: true,
-        message: "Failed to fetch FAQs.",
-        type: "error",
+        message: 'Failed to fetch FAQs.',
+        type: 'error',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleAddOpen = () => {
     setFormData({
-      question: "",
-      answer: "",
+      question: '',
+      answer: '',
     });
     setOpenAddDialog(true);
   };
@@ -106,28 +114,31 @@ const FAQ = () => {
     if (!formData.question || !formData.answer) {
       setSnackbar({
         open: true,
-        message: "Please fill in all required fields.",
-        type: "error",
+        message: 'Please fill in all required fields.',
+        type: 'error',
       });
       return;
     }
 
+    setIsLoading(true);
     try {
-      await axios.post("/api/faq", formData);
+      await axios.post('/api/faq', formData);
       setSnackbar({
         open: true,
-        message: "FAQ added successfully.",
-        type: "success",
+        message: 'FAQ added successfully.',
+        type: 'success',
       });
       fetchFaqs();
       handleAddClose();
     } catch (error) {
-      console.error("Error adding FAQ:", error);
+      console.error('Error adding FAQ:', error);
       setSnackbar({
         open: true,
-        message: "Failed to add FAQ.",
-        type: "error",
+        message: 'Failed to add FAQ.',
+        type: 'error',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -137,28 +148,31 @@ const FAQ = () => {
     if (!formData.question || !formData.answer) {
       setSnackbar({
         open: true,
-        message: "Please fill in all required fields.",
-        type: "error",
+        message: 'Please fill in all required fields.',
+        type: 'error',
       });
       return;
     }
 
+    setIsLoading(true);
     try {
       await axios.put(`/api/faq/${editingFaq.id}`, formData);
       setSnackbar({
         open: true,
-        message: "FAQ updated successfully.",
-        type: "success",
+        message: 'FAQ updated successfully.',
+        type: 'success',
       });
       fetchFaqs();
       handleEditClose();
     } catch (error) {
-      console.error("Error updating FAQ:", error);
+      console.error('Error updating FAQ:', error);
       setSnackbar({
         open: true,
-        message: "Failed to update FAQ.",
-        type: "error",
+        message: 'Failed to update FAQ.',
+        type: 'error',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -167,23 +181,25 @@ const FAQ = () => {
   };
 
   const handleConfirmDelete = async () => {
+    setIsLoading(true);
     try {
       await axios.delete(`/api/faq/${deleteConfirmation.id}`);
       setSnackbar({
         open: true,
-        message: "FAQ deleted successfully.",
-        type: "warning",
+        message: 'FAQ deleted successfully.',
+        type: 'warning',
       });
       fetchFaqs();
     } catch (error) {
-      console.error("Error deleting FAQ:", error);
+      console.error('Error deleting FAQ:', error);
       setSnackbar({
         open: true,
-        message: "Failed to delete FAQ.",
-        type: "error",
+        message: 'Failed to delete FAQ.',
+        type: 'error',
       });
     } finally {
       setDeleteConfirmation({ open: false, id: null });
+      setIsLoading(false);
     }
   };
 
@@ -194,45 +210,45 @@ const FAQ = () => {
   const columns = React.useMemo(
     () => [
       {
-        Header: "ID",
-        accessor: "id",
+        Header: 'ID',
+        accessor: 'id',
       },
       {
-        Header: "Question",
-        accessor: "question",
+        Header: 'Question',
+        accessor: 'question',
       },
       {
-        Header: "Answer",
-        accessor: "answer",
+        Header: 'Answer',
+        accessor: 'answer',
       },
       {
-        Header: "Created At",
-        accessor: "createdAt",
+        Header: 'Created At',
+        accessor: 'createdAt',
         Cell: ({ value }) => new Date(value).toLocaleDateString(),
       },
       {
-        Header: "Updated At",
-        accessor: "updatedAt",
+        Header: 'Updated At',
+        accessor: 'updatedAt',
         Cell: ({ value }) => new Date(value).toLocaleDateString(),
       },
       {
-        Header: "Actions",
-        accessor: "actions",
+        Header: 'Actions',
+        accessor: 'actions',
         Cell: ({ row }) => (
-          <div className="flex gap-6">
-            <FaUserEdit
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <IconButton
               onClick={() => handleEditOpen(row.original)}
-              style={{
-                fontSize: "26px",
-                color: "#006a5c",
-                cursor: "pointer",
-              }}
-            />
-            <MdDeleteForever
+              sx={{ color: '#006a5c' }}
+            >
+              <EditIcon />
+            </IconButton>
+            <IconButton
               onClick={() => handleDelete(row.original.id)}
-              style={{ fontSize: "26px", color: "#b03f37", cursor: "pointer" }}
-            />
-          </div>
+              sx={{ color: '#b03f37' }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Box>
         ),
       },
     ],
@@ -262,85 +278,125 @@ const FAQ = () => {
   const { pageIndex, pageSize, globalFilter } = state;
 
   return (
-    <div style={{ padding: "20px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
-        <Toolbar>
-          <InputBase
-            value={globalFilter || ""}
-            onChange={(e) => setGlobalFilter(e.target.value || undefined)}
-            placeholder="Search FAQs"
-            style={{
-              padding: "6px 10px",
-              backgroundColor: "#eaeaea",
-              borderRadius: "4px",
-            }}
-          />
-        </Toolbar>
-        <Button variant="contained" color="primary" onClick={handleAddOpen}>
-          Add New FAQ
-        </Button>
-      </div>
+    <Box sx={{ bgcolor: 'grey.100', minHeight: '100vh', p: 1 }}>
+      {/* Loading Overlay */}
+      {isLoading && (
+        <Box
+          sx={{
+            position: 'fixed',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1300,
+          }}
+        >
+          <CircularProgress color="inherit" />
+          <Typography variant="h6" sx={{ ml: 2, color: '#fff' }}>
+            Loading...
+          </Typography>
+        </Box>
+      )}
 
-      <TableContainer component={Paper}>
-        <Table {...getTableProps()}>
-          <TableHead>
-            {headerGroups.map((headerGroup) => (
-              <TableRow key={headerGroup.id} {...headerGroup.getHeaderGroupProps()}>
-                {headerGroup.headers.map((column) => (
-                  <TableCell key={column.id} {...column.getHeaderProps(column.getSortByToggleProps())}>
-                    {column.render("Header")}
-                    {column.isSorted ? (column.isSortedDesc ? " 🔽" : " 🔼") : ""}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableHead>
-          <TableBody {...getTableBodyProps()}>
-            {page.map((row) => {
-              prepareRow(row);
-              return (
-                <TableRow key={row.id} {...row.getRowProps()}>
-                  {row.cells.map((cell) => (
-                    <TableCell key={cell.id} {...cell.getCellProps()}>
-                      {cell.render("Cell")}
+      {/* Main Content */}
+      <Paper sx={{ p: 2, borderRadius: 2, boxShadow: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Toolbar sx={{ flex: 1 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                bgcolor: 'grey.200',
+                borderRadius: '4px',
+                p: '4px 8px',
+                width: { xs: '100%', sm: '300px' },
+              }}
+            >
+              <SearchIcon sx={{ color: 'grey.600', mr: 1 }} />
+              <InputBase
+                value={globalFilter || ''}
+                onChange={(e) => setGlobalFilter(e.target.value || undefined)}
+                placeholder="Search FAQs"
+                sx={{ flex: 1 }}
+              />
+            </Box>
+          </Toolbar>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleAddOpen}
+            sx={{ borderRadius: '8px' }}
+          >
+            Add New FAQ
+          </Button>
+        </Box>
+
+        <TableContainer sx={{ maxHeight: '70vh', overflowX: 'auto' }}>
+          <Table {...getTableProps()}>
+            <TableHead>
+              {headerGroups.map((headerGroup) => (
+                <TableRow key={headerGroup.id} {...headerGroup.getHeaderGroupProps()}>
+                  {headerGroup.headers.map((column) => (
+                    <TableCell
+                      key={column.id}
+                      {...column.getHeaderProps(column.getSortByToggleProps())}
+                      sx={{ fontWeight: 'bold', bgcolor: 'grey.50' }}
+                    >
+                      {column.render('Header')}
+                      {column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}
                     </TableCell>
                   ))}
                 </TableRow>
-              );
-            })}
-            {page.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={columns.length} align="center">
-                  No FAQs found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              ))}
+            </TableHead>
+            <TableBody {...getTableBodyProps()}>
+              {page.map((row, index) => {
+                prepareRow(row);
+                return (
+                  <TableRow
+                    key={row.id}
+                    {...row.getRowProps()}
+                    sx={{ bgcolor: index % 2 === 0 ? 'white' : 'grey.50' }}
+                  >
+                    {row.cells.map((cell) => (
+                      <TableCell key={cell.id} {...cell.getCellProps()}>
+                        {cell.render('Cell')}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })}
+              {page.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={columns.length} align="center">
+                    No FAQs found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25, { label: "All", value: faqs.length }]}
-        component="div"
-        count={faqs.length}
-        rowsPerPage={pageSize}
-        page={pageIndex}
-        onPageChange={(event, newPage) => gotoPage(newPage)}
-        onRowsPerPageChange={(event) => setPageSize(Number(event.target.value))}
-      />
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25, { label: 'All', value: faqs.length }]}
+          component="div"
+          count={faqs.length}
+          rowsPerPage={pageSize}
+          page={pageIndex}
+          onPageChange={(event, newPage) => gotoPage(newPage)}
+          onRowsPerPageChange={(event) => setPageSize(Number(event.target.value))}
+        />
+      </Paper>
 
-      <Dialog open={openAddDialog} onClose={handleAddClose} maxWidth="xl" fullWidth>
-        <DialogTitle>
+      {/* Add FAQ Dialog */}
+      <Dialog open={openAddDialog} onClose={handleAddClose} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           Add New FAQ
           <IconButton
             aria-label="close"
             onClick={handleAddClose}
-            sx={{
-              position: "absolute",
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
+            sx={{ color: 'grey.500' }}
           >
             <CloseIcon />
           </IconButton>
@@ -355,6 +411,9 @@ const FAQ = () => {
               fullWidth
               required
               margin="normal"
+              variant="outlined"
+              size="small"
+              InputProps={{ sx: { borderRadius: '8px' } }}
             />
             <TextField
               label="Answer"
@@ -366,12 +425,23 @@ const FAQ = () => {
               margin="normal"
               multiline
               rows={4}
+              variant="outlined"
+              size="small"
+              InputProps={{ sx: { borderRadius: '8px' } }}
             />
             <DialogActions>
-              <Button onClick={handleAddClose} color="primary">
+              <Button
+                onClick={handleAddClose}
+                sx={{ color: 'grey.600', borderRadius: '8px' }}
+              >
                 Cancel
               </Button>
-              <Button type="submit" color="primary" variant="contained">
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                sx={{ borderRadius: '8px' }}
+              >
                 Save
               </Button>
             </DialogActions>
@@ -379,18 +449,14 @@ const FAQ = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={openEditDialog} onClose={handleEditClose} maxWidth="xl" fullWidth>
-        <DialogTitle>
+      {/* Edit FAQ Dialog */}
+      <Dialog open={openEditDialog} onClose={handleEditClose} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           Edit FAQ
           <IconButton
             aria-label="close"
             onClick={handleEditClose}
-            sx={{
-              position: "absolute",
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
+            sx={{ color: 'grey.500' }}
           >
             <CloseIcon />
           </IconButton>
@@ -405,6 +471,9 @@ const FAQ = () => {
               fullWidth
               required
               margin="normal"
+              variant="outlined"
+              size="small"
+              InputProps={{ sx: { borderRadius: '8px' } }}
             />
             <TextField
               label="Answer"
@@ -416,12 +485,23 @@ const FAQ = () => {
               margin="normal"
               multiline
               rows={4}
+              variant="outlined"
+              size="small"
+              InputProps={{ sx: { borderRadius: '8px' } }}
             />
             <DialogActions>
-              <Button onClick={handleEditClose} color="primary">
+              <Button
+                onClick={handleEditClose}
+                sx={{ color: 'grey.600', borderRadius: '8px' }}
+              >
                 Cancel
               </Button>
-              <Button type="submit" color="primary" variant="contained">
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                sx={{ borderRadius: '8px' }}
+              >
                 Update
               </Button>
             </DialogActions>
@@ -429,47 +509,55 @@ const FAQ = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteConfirmation.open}
         onClose={handleCancelDelete}
         aria-labelledby="delete-confirmation-title"
         aria-describedby="delete-confirmation-description"
       >
-        <DialogTitle id="delete-confirmation-title">
-          Confirm Deletion
-        </DialogTitle>
+        <DialogTitle id="delete-confirmation-title">Confirm Deletion</DialogTitle>
         <DialogContent>
           {deleteConfirmation.id && (
-            <p>
+            <Typography>
               Are you sure you want to delete the FAQ with ID {deleteConfirmation.id}?
-            </p>
+            </Typography>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancelDelete} color="primary">
+          <Button
+            onClick={handleCancelDelete}
+            sx={{ color: 'grey.600', borderRadius: '8px' }}
+          >
             Cancel
           </Button>
-          <Button onClick={handleConfirmDelete} color="secondary">
+          <Button
+            onClick={handleConfirmDelete}
+            color="secondary"
+            variant="contained"
+            sx={{ borderRadius: '8px' }}
+          >
             Confirm
           </Button>
         </DialogActions>
       </Dialog>
 
+      {/* Snackbar for Notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={5000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <Alert
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           severity={snackbar.type}
-          sx={{ width: "100%" }}
+          sx={{ width: '100%' }}
         >
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 };
 

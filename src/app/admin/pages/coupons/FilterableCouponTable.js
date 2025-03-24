@@ -1,17 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+  InputAdornment,
+  Checkbox,
+  Backdrop,
+} from "@mui/material";
+import {
+  Search as SearchIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
 
 const FilterableCouponTable = ({ coupons, fetchCoupons }) => {
-  const [filter, setFilter] = useState('');
+  const [filter, setFilter] = useState("");
   const [filteredData, setFilteredData] = useState(coupons || []);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [newCoupon, setNewCoupon] = useState({
     id: null,
-    code: '',
+    code: "",
     discount: 0,
-    expiration: '',
+    expiration: "",
     isActive: true,
   });
 
@@ -35,30 +62,26 @@ const FilterableCouponTable = ({ coupons, fetchCoupons }) => {
 
       const response = newCoupon.id
         ? await fetch(`/api/coupons/${newCoupon.id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(couponToSubmit),
           })
-        : await fetch('/api/coupons', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+        : await fetch("/api/coupons", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(couponToSubmit),
           });
 
       if (!response.ok) {
-        throw new Error('Failed to create or update coupon');
+        throw new Error("Failed to create or update coupon");
       }
 
       await response.json();
-      fetchCoupons(); // Refresh the data after adding
+      fetchCoupons();
       setIsModalOpen(false);
-      setNewCoupon({ id: null, code: '', discount: 0, expiration: '', isActive: true });
+      setNewCoupon({ id: null, code: "", discount: 0, expiration: "", isActive: true });
     } catch (error) {
-      console.error('Error adding or updating coupon:', error);
+      console.error("Error adding or updating coupon:", error);
     }
     setIsLoading(false);
   };
@@ -67,14 +90,12 @@ const FilterableCouponTable = ({ coupons, fetchCoupons }) => {
     setIsLoading(true);
     try {
       await fetch(`/api/coupons/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
       });
-      fetchCoupons(); // Refresh the data after deleting
+      fetchCoupons();
     } catch (error) {
-      console.error('Error deleting coupon:', error);
+      console.error("Error deleting coupon:", error);
     }
     setIsLoading(false);
   };
@@ -82,161 +103,184 @@ const FilterableCouponTable = ({ coupons, fetchCoupons }) => {
   const handleEditItem = (item) => {
     setNewCoupon({
       ...item,
-      expiration: item.expiration ? new Date(item.expiration).toISOString().slice(0, 10) : '',
+      expiration: item.expiration ? new Date(item.expiration).toISOString().slice(0, 10) : "",
     });
     setIsModalOpen(true);
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      {isLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="text-white text-xl">Loading...</div>
-        </div>
-      )}
-      <div className="bg-white shadow rounded-lg p-4 relative">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">Coupons List</h2>
-          <div className="flex space-x-2">
-            <button
-              className="text-gray-600 hover:text-gray-900 focus:outline-none"
+    <Box sx={{ p: 1, bgcolor: "grey.100", minHeight: "100vh" }}>
+      {/* Loading Overlay */}
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
+      >
+        <CircularProgress color="inherit" />
+        <Typography variant="h6" sx={{ ml: 2 }}>
+          Loading...
+        </Typography>
+      </Backdrop>
+
+      {/* Main Content */}
+      <Paper sx={{ p: 2, boxShadow: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+          <Typography variant="h5" sx={{ fontWeight: "medium", color: "grey.800" }}>
+            Coupons List
+          </Typography>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <IconButton
+              color="inherit"
               onClick={() => setIsSearchVisible(!isSearchVisible)}
+              aria-label="toggle search"
             >
-              <MagnifyingGlassIcon className="h-6 w-6" />
-            </button>
-            <button
-              className="text-gray-600 hover:text-gray-900 focus:outline-none"
+              <SearchIcon />
+            </IconButton>
+            <IconButton
+              color="inherit"
               onClick={() => {
                 setNewCoupon({
                   id: null,
-                  code: '',
+                  code: "",
                   discount: 0,
-                  expiration: '',
+                  expiration: "",
                   isActive: true,
                 });
                 setIsModalOpen(true);
               }}
+              aria-label="add new coupon"
             >
-              <PlusIcon className="h-6 w-6" />
-            </button>
-          </div>
-        </div>
+              <AddIcon />
+            </IconButton>
+          </Box>
+        </Box>
+
+        {/* Search Field */}
         {isSearchVisible && (
-          <div className="mb-4">
-            <input
-              type="text"
-              placeholder="Search..."
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+          <TextField
+            fullWidth
+            variant="outlined"
+            placeholder="Search..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            sx={{ mb: 2 }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: "grey.500" }} />
+                </InputAdornment>
+              ),
+            }}
+          />
         )}
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiration</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+
+        {/* Table */}
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ bgcolor: "grey.50" }}>
+                <TableCell sx={{ fontWeight: "medium", color: "grey.500" }}>ID</TableCell>
+                <TableCell sx={{ fontWeight: "medium", color: "grey.500" }}>Code</TableCell>
+                <TableCell sx={{ fontWeight: "medium", color: "grey.500" }}>Discount</TableCell>
+                <TableCell sx={{ fontWeight: "medium", color: "grey.500" }}>Expiration</TableCell>
+                <TableCell sx={{ fontWeight: "medium", color: "grey.500" }}>Active</TableCell>
+                <TableCell sx={{ fontWeight: "medium", color: "grey.500" }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {Array.isArray(filteredData) && filteredData.length > 0 ? (
                 filteredData.map((item, index) => (
-                  <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.code}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.discount}%</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.expiration ? new Date(item.expiration).toLocaleString() : 'N/A'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.isActive ? 'Yes' : 'No'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                      <button
-                        onClick={() => handleEditItem(item)}
-                        className="text-indigo-600 hover:text-indigo-900 transition duration-150 ease-in-out"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteItem(item.id)}
-                        className="text-red-600 hover:text-red-900 transition duration-150 ease-in-out"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
+                  <TableRow key={item.id} sx={{ bgcolor: index % 2 === 0 ? "white" : "grey.50" }}>
+                    <TableCell sx={{ fontWeight: "medium", color: "grey.900" }}>{item.id}</TableCell>
+                    <TableCell sx={{ color: "grey.500" }}>{item.code}</TableCell>
+                    <TableCell sx={{ color: "grey.500" }}>{item.discount}%</TableCell>
+                    <TableCell sx={{ color: "grey.500" }}>
+                      {item.expiration ? new Date(item.expiration).toLocaleString() : "N/A"}
+                    </TableCell>
+                    <TableCell sx={{ color: "grey.500" }}>{item.isActive ? "Yes" : "No"}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: "flex", gap: 1 }}>
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleEditItem(item)}
+                          aria-label="edit coupon"
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          color="error"
+                          onClick={() => handleDeleteItem(item.id)}
+                          aria-label="delete coupon"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
                 ))
               ) : (
-                <tr>
-                  <td colSpan="6" className="px-6 py-4 text-center text-gray-500">No data available</td>
-                </tr>
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    <Typography variant="body1" color="grey.500">
+                      No data available
+                    </Typography>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-4 w-[700px] rounded shadow-lg">
-            <h2 className="text-xl mb-4">{newCoupon.id ? 'Edit Coupon' : 'Add New Coupon'}</h2>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Code</label>
-              <input
-                type="text"
-                value={newCoupon.code}
-                onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value })}
-                className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Discount (%)</label>
-              <input
-                type="number"
-                value={newCoupon.discount}
-                onChange={(e) => setNewCoupon({ ...newCoupon, discount: parseFloat(e.target.value) })}
-                className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Expiration Date</label>
-              <input
-                type="date"
-                value={newCoupon.expiration}
-                onChange={(e) => setNewCoupon({ ...newCoupon, expiration: e.target.value })}
-                className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Active</label>
-              <input
-                type="checkbox"
+      {/* Add/Edit Coupon Dialog */}
+      <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          <Typography variant="h6">{newCoupon.id ? "Edit Coupon" : "Add New Coupon"}</Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 2 }}>
+            <TextField
+              label="Code"
+              fullWidth
+              variant="outlined"
+              value={newCoupon.code}
+              onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value })}
+            />
+            <TextField
+              label="Discount (%)"
+              type="number"
+              fullWidth
+              variant="outlined"
+              value={newCoupon.discount}
+              onChange={(e) => setNewCoupon({ ...newCoupon, discount: parseFloat(e.target.value) })}
+            />
+            <TextField
+              label="Expiration Date"
+              type="date"
+              fullWidth
+              variant="outlined"
+              value={newCoupon.expiration}
+              onChange={(e) => setNewCoupon({ ...newCoupon, expiration: e.target.value })}
+              InputLabelProps={{ shrink: true }}
+            />
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Checkbox
                 checked={newCoupon.isActive}
                 onChange={(e) => setNewCoupon({ ...newCoupon, isActive: e.target.checked })}
-                className="mt-1 p-2 border border-gray-300 rounded"
               />
-            </div>
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAddNewItem}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              >
-                {newCoupon.id ? 'Update' : 'Add'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+              <Typography variant="body1">Active</Typography>
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsModalOpen(false)} color="inherit" variant="outlined">
+            Cancel
+          </Button>
+          <Button onClick={handleAddNewItem} color="primary" variant="contained">
+            {newCoupon.id ? "Update" : "Add"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 

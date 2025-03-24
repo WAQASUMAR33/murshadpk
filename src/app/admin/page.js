@@ -1,8 +1,20 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+
+// MUI Imports
+import {
+  Box,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Typography,
+  CircularProgress,
+  FormControlLabel,
+  Switch,
+} from '@mui/material';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -16,18 +28,16 @@ const LoginPage = () => {
     password: '',
     phoneno: '',
     city: '',
-    role: 'ADMIN', // Default role can be ADMIN or CUSTOMER
+    role: 'ADMIN',
     image: null,
     base64: '',
   });
 
   const router = useRouter();
 
-  // Check if a token already exists in localStorage
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      // Redirect to the appropriate page based on stored role
       const userRole = localStorage.getItem('role');
       if (userRole === 'ADMIN') {
         router.push('/admin/pages/Products');
@@ -46,8 +56,8 @@ const LoginPage = () => {
       const response = await axios.post('/api/login', { email, password });
       if (response.data.success) {
         const { token, user } = response.data;
-        localStorage.setItem('token', token); // Store JWT token in localStorage
-        localStorage.setItem('role', user.role); // Store user role in localStorage
+        localStorage.setItem('token', token);
+        localStorage.setItem('role', user.role);
 
         if (user.role === 'ADMIN') {
           alert('Login Successfully');
@@ -77,7 +87,7 @@ const LoginPage = () => {
       const formDataToSend = {
         ...formData,
         imageUrl: uploadedImageUrl,
-        base64: '', // Remove base64 as it's no longer needed
+        base64: '',
       };
 
       const response = await fetch('/api/users', {
@@ -114,7 +124,7 @@ const LoginPage = () => {
       });
       const result = await response.json();
       if (response.ok) {
-        return result.image_url; // Ensure this key matches the response from your upload endpoint
+        return result.image_url;
       } else {
         throw new Error(result.error || 'Failed to upload image');
       }
@@ -140,7 +150,7 @@ const LoginPage = () => {
       setFormData((prevFormData) => ({
         ...prevFormData,
         image: file,
-        base64: reader.result.split(',')[1], // Get base64 part of the string
+        base64: reader.result.split(',')[1],
       }));
     };
 
@@ -148,121 +158,166 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: '#f5f5f5', // bg-gray-100 equivalent
+      }}
+    >
       {!isRegistering ? (
-        <form className="bg-white p-8 rounded shadow-md w-full max-w-md" onSubmit={handleLogin}>
-          <h2 className="text-2xl font-bold mb-6">Admin Login</h2>
-          {error && <p className="text-red-500 mb-4">{error}</p>}
-          <div className="mb-4">
-            <label className="block text-gray-700">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className={`w-full py-2 rounded-md text-white ${loading ? 'bg-gray-500' : 'bg-blue-500 hover:bg-blue-600'}`}
-            disabled={loading}
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
+        <Card sx={{ width: '100%', maxWidth: 400, p: 3 }}>
+          <CardContent>
+            <Typography variant="h5" component="h2" sx={{ fontWeight: 'bold', mb: 3 }}>
+              Admin Login
+            </Typography>
+            {error && (
+              <Typography color="error" sx={{ mb: 2 }}>
+                {error}
+              </Typography>
+            )}
+            <form onSubmit={handleLogin}>
+              <TextField
+                label="Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                fullWidth
+                variant="outlined"
+                sx={{ mb: 2 }}
+                required
+              />
+              <TextField
+                label="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                fullWidth
+                variant="outlined"
+                sx={{ mb: 2 }}
+                required
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                disabled={loading}
+                sx={{ py: 1 }}
+              >
+                {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
+              </Button>
+              <Box sx={{ mt: 2, textAlign: 'center' }}>
+                <Button
+                  variant="text"
+                  color="primary"
+                  onClick={() => setIsRegistering(true)}
+                >
+                  Register Instead
+                </Button>
+              </Box>
+            </form>
+          </CardContent>
+        </Card>
       ) : (
-        <form className="bg-white p-8 rounded shadow-md w-full max-w-md" onSubmit={handleRegister}>
-          <h2 className="text-2xl font-bold mb-6">Register</h2>
-          <div className="mb-4">
-            <label className="block text-gray-700">Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">Phone Number</label>
-            <input
-              type="text"
-              name="phoneno"
-              value={formData.phoneno}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">City</label>
-            <input
-              type="text"
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700">Profile Image</label>
-            <input
-              type="file"
-              name="image"
-              onChange={handleImageChange}
-              className="w-full px-4 py-2 border rounded-md"
-            />
-          </div>
-          <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-md">
-            Register
-          </button>
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setIsRegistering(false)}
-              className="w-full mt-2 py-2 rounded-md text-white bg-gray-500 hover:bg-gray-600"
-            >
-              Back to Login
-            </button>
-          </div>
-        </form>
+        <Card sx={{ width: '100%', maxWidth: 400, p: 3 }}>
+          <CardContent>
+            <Typography variant="h5" component="h2" sx={{ fontWeight: 'bold', mb: 3 }}>
+              Register
+            </Typography>
+            <form onSubmit={handleRegister}>
+              <TextField
+                label="Name"
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                fullWidth
+                variant="outlined"
+                sx={{ mb: 2 }}
+                required
+              />
+              <TextField
+                label="Email"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                fullWidth
+                variant="outlined"
+                sx={{ mb: 2 }}
+                required
+              />
+              <TextField
+                label="Password"
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                fullWidth
+                variant="outlined"
+                sx={{ mb: 2 }}
+                required
+              />
+              <TextField
+                label="Phone Number"
+                type="text"
+                name="phoneno"
+                value={formData.phoneno}
+                onChange={handleChange}
+                fullWidth
+                variant="outlined"
+                sx={{ mb: 2 }}
+                required
+              />
+              <TextField
+                label="City"
+                type="text"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                fullWidth
+                variant="outlined"
+                sx={{ mb: 2 }}
+                required
+              />
+              <TextField
+                label="Profile Image"
+                type="file"
+                name="image"
+                onChange={handleImageChange}
+                fullWidth
+                variant="outlined"
+                sx={{ mb: 2 }}
+                InputLabelProps={{ shrink: true }}
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+                sx={{ py: 1 }}
+              >
+                Register
+              </Button>
+              <Box sx={{ mt: 2, textAlign: 'center' }}>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  fullWidth
+                  onClick={() => setIsRegistering(false)}
+                  sx={{ py: 1 }}
+                >
+                  Back to Login
+                </Button>
+              </Box>
+            </form>
+          </CardContent>
+        </Card>
       )}
-    </div>
+    </Box>
   );
 };
 

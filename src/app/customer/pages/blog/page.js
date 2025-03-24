@@ -38,6 +38,10 @@ export default function Blog() {
       <Head>
         <title>Blog Page</title>
       </Head>
+
+      <div  className=' pt-8'>
+
+      </div>
       <main className="container mx-auto px-4 py-4">
         <h1 className="text-4xl font-bold text-start">Blog Page</h1>
 

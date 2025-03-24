@@ -3,6 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
+// MUI Imports
+import {
+  Box,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Backdrop,
+  CircularProgress,
+} from '@mui/material';
+import { styled } from '@mui/system';
+
 const AddSetting = ({ setting = {}, fetchSettings }) => {
   const [formData, setFormData] = useState({
     deliveryCharge: setting.deliveryCharge || '',
@@ -55,75 +67,133 @@ const AddSetting = ({ setting = {}, fetchSettings }) => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      {isLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="text-white text-xl">Loading...</div>
-        </div>
-      )}
-      <div className="bg-white shadow rounded-lg p-4">
-        <h2 className="text-xl mb-4">{setting.id ? 'Edit Setting' : 'Add Setting'}</h2>
+    <Box sx={{ bgcolor: 'grey.100', minHeight: '100vh', p: 3 }}>
+      {/* Loading Backdrop */}
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
+      >
+        <CircularProgress color="inherit" />
+        <Typography variant="h6" sx={{ ml: 2, color: '#fff' }}>
+          Loading...
+        </Typography>
+      </Backdrop>
+
+      {/* Main Content */}
+      <Paper
+        sx={{
+          p: 4,
+          borderRadius: 2,
+          boxShadow: 3,
+          maxWidth: '600px',
+          mx: 'auto',
+        }}
+      >
+        <Typography variant="h6" sx={{ mb: 4, fontWeight: 'bold', color: 'grey.800' }}>
+          {setting.id ? 'Edit Setting' : 'Add Setting'}
+        </Typography>
+
         <form onSubmit={handleFormSubmit}>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Delivery Charge</label>
-            <input
-              type="number"
+          {/* Delivery Charge */}
+          <Box sx={{ mb: 3 }}>
+            <TextField
+              fullWidth
+              label="Delivery Charge"
               name="deliveryCharge"
+              type="number"
               value={formData.deliveryCharge}
               onChange={handleFormChange}
-              className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              variant="outlined"
+              size="small"
               required
+              InputProps={{
+                sx: { borderRadius: '8px' },
+              }}
             />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Tax Percentage</label>
-            <input
-              type="number"
+          </Box>
+
+          {/* Tax Percentage */}
+          <Box sx={{ mb: 3 }}>
+            <TextField
+              fullWidth
+              label="Tax Percentage"
               name="taxPercentage"
+              type="number"
               value={formData.taxPercentage}
               onChange={handleFormChange}
-              className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              variant="outlined"
+              size="small"
               required
+              InputProps={{
+                sx: { borderRadius: '8px' },
+              }}
             />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Other1</label>
-            <input
-              type="number"
+          </Box>
+
+          {/* Other1 */}
+          <Box sx={{ mb: 3 }}>
+            <TextField
+              fullWidth
+              label="Other1"
               name="other1"
+              type="number"
               value={formData.other1}
               onChange={handleFormChange}
-              className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              variant="outlined"
+              size="small"
+              InputProps={{
+                sx: { borderRadius: '8px' },
+              }}
             />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Other2</label>
-            <input
-              type="number"
+          </Box>
+
+          {/* Other2 */}
+          <Box sx={{ mb: 3 }}>
+            <TextField
+              fullWidth
+              label="Other2"
               name="other2"
+              type="number"
               value={formData.other2}
               onChange={handleFormChange}
-              className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              variant="outlined"
+              size="small"
+              InputProps={{
+                sx: { borderRadius: '8px' },
+              }}
             />
-          </div>
-          <div className="flex justify-end space-x-2">
-            <button
-              type="button"
+          </Box>
+
+          {/* Buttons */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+            <Button
               onClick={() => router.push('/admin/pages/settings')}
-              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+              variant="contained"
+              sx={{
+                bgcolor: 'grey.300',
+                color: 'grey.800',
+                '&:hover': { bgcolor: 'grey.400' },
+                borderRadius: '8px',
+              }}
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              variant="contained"
+              color="primary"
+              sx={{
+                bgcolor: 'blue.500',
+                '&:hover': { bgcolor: 'blue.700' },
+                borderRadius: '8px',
+              }}
             >
               {setting.id ? 'Update' : 'Add'}
-            </button>
-          </div>
+            </Button>
+          </Box>
         </form>
-      </div>
-    </div>
+      </Paper>
+    </Box>
   );
 };
 

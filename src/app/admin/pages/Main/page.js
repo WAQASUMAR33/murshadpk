@@ -13,14 +13,28 @@ import {
 import { useState, useEffect, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import {
-  FaShippingFast,
-  FaBoxOpen,
-  FaClipboardList,
-  FaTruck,
-  FaTimesCircle,
-} from 'react-icons/fa';
 import axios from 'axios';
+
+// MUI Imports
+import {
+  Box,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Paper,
+  IconButton,
+  TextField, // Added TextField import
+} from '@mui/material';
+import {
+  Inventory as InventoryIcon,
+  Payment as PaymentIcon,
+  LocalShipping as LocalShippingIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+} from '@mui/icons-material';
 
 ChartJS.register(
   CategoryScale,
@@ -35,7 +49,6 @@ ChartJS.register(
 export default function Home() {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
-
   const [statsData, setStatsData] = useState(null);
   const [salesData, setSalesData] = useState({
     labels: [],
@@ -57,7 +70,6 @@ export default function Home() {
       if (response.ok) {
         setStatsData(result.data);
 
-        // Prepare sales data for the graph, each status will have its own dataset
         const salesLabels = [];
         const pendingAmounts = [];
         const paidAmounts = [];
@@ -95,32 +107,32 @@ export default function Home() {
             {
               label: 'Pending',
               data: pendingAmounts,
-              borderColor: '#FBBF24', // Yellow
-              backgroundColor: 'rgba(251, 191, 36, 0.2)', // Lighter yellow
+              borderColor: '#FBBF24',
+              backgroundColor: 'rgba(251, 191, 36, 0.2)',
             },
             {
               label: 'Paid',
               data: paidAmounts,
-              borderColor: '#3B82F6', // Blue
-              backgroundColor: 'rgba(59, 130, 246, 0.2)', // Lighter blue
+              borderColor: '#3B82F6',
+              backgroundColor: 'rgba(59, 130, 246, 0.2)',
             },
             {
               label: 'Shipped',
               data: shippedAmounts,
-              borderColor: '#6366F1', // Indigo
-              backgroundColor: 'rgba(99, 102, 241, 0.2)', // Lighter indigo
+              borderColor: '#6366F1',
+              backgroundColor: 'rgba(99, 102, 241, 0.2)',
             },
             {
               label: 'Completed',
               data: completedAmounts,
-              borderColor: '#10B981', // Green
-              backgroundColor: 'rgba(16, 185, 129, 0.2)', // Lighter green
+              borderColor: '#10B981',
+              backgroundColor: 'rgba(16, 185, 129, 0.2)',
             },
             {
               label: 'Cancelled',
               data: cancelledAmounts,
-              borderColor: '#EF4444', // Red
-              backgroundColor: 'rgba(239, 68, 68, 0.2)', // Lighter red
+              borderColor: '#EF4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.2)',
             },
           ],
         });
@@ -134,7 +146,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchData(startDate, endDate);
-  }, []);
+  }, [startDate, endDate]); // Added dependency array to refetch on date change
 
   const handleFilter = () => {
     if (startDate && endDate) {
@@ -148,38 +160,38 @@ export default function Home() {
     return [
       {
         label: 'Pending Orders',
-        value: statsData.pending.count,
-        amount: statsData.pending.amount,
-        icon: <FaClipboardList size={28} />,
-        color: 'bg-yellow-500',
+        value: statsData.pending?.count || 0, // Safe access
+        amount: statsData.pending?.amount || 0,
+        icon: <InventoryIcon sx={{ fontSize: 28 }} />,
+        color: '#FBBF24',
       },
       {
         label: 'Paid Orders',
-        value: statsData.paid.count,
-        amount: statsData.paid.amount,
-        icon: <FaBoxOpen size={28} />,
-        color: 'bg-blue-500',
+        value: statsData.paid?.count || 0,
+        amount: statsData.paid?.amount || 0,
+        icon: <PaymentIcon sx={{ fontSize: 28 }} />,
+        color: '#3B82F6',
       },
       {
         label: 'Shipped Orders',
-        value: statsData.shipped.count,
-        amount: statsData.shipped.amount,
-        icon: <FaTruck size={28} />,
-        color: 'bg-indigo-500',
+        value: statsData.shipped?.count || 0,
+        amount: statsData.shipped?.amount || 0,
+        icon: <LocalShippingIcon sx={{ fontSize: 28 }} />,
+        color: '#6366F1',
       },
       {
         label: 'Completed Orders',
-        value: statsData.completed.count,
-        amount: statsData.completed.amount,
-        icon: <FaShippingFast size={28} />,
-        color: 'bg-green-500',
+        value: statsData.completed?.count || 0,
+        amount: statsData.completed?.amount || 0,
+        icon: <CheckCircleIcon sx={{ fontSize: 28 }} />,
+        color: '#10B981',
       },
       {
         label: 'Cancelled Orders',
-        value: statsData.cancelled.count,
-        amount: statsData.cancelled.amount,
-        icon: <FaTimesCircle size={28} />,
-        color: 'bg-red-500',
+        value: statsData.cancelled?.count || 0,
+        amount: statsData.cancelled?.amount || 0,
+        icon: <CancelIcon sx={{ fontSize: 28 }} />,
+        color: '#EF4444',
       },
     ];
   }, [statsData]);
@@ -207,86 +219,97 @@ export default function Home() {
   };
 
   return (
-    <>
-      <div className="pt-6 min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row md:justify-between items-center mb-8">
-            <div className="flex space-x-4 justify-center items-center">
-              <div>
-                <DatePicker
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date)}
-                  selectsStart
-                  startDate={startDate}
-                  endDate={endDate}
-                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholderText="Start date"
-                />
-              </div>
-              <div className="flex justify-center items-center">-</div>
-              <div>
-                <DatePicker
-                  selected={endDate}
-                  onChange={(date) => setEndDate(date)}
-                  selectsEnd
-                  startDate={startDate}
-                  endDate={endDate}
-                  minDate={startDate}
-                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholderText="End date"
-                />
-              </div>
-              <div>
-                <button
-                  className="px-6 py-2 bg-indigo-600 text-white rounded-md shadow-md hover:bg-indigo-700 transition duration-300"
-                  onClick={handleFilter}
-                >
-                  Filter
-                </button>
-              </div>
-            </div>
-          </div>
+    <Box sx={{ pt: 3, minHeight: '100vh', bgcolor: '#F9FAFB' }}>
+      <Container maxWidth="lg" sx={{ px: 3 }}>
+        {/* Date Filter Section */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            justifyContent: { md: 'space-between' },
+            alignItems: 'center',
+            mb: 4,
+            gap: 2,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <DatePicker
+              selected={startDate}
+              onChange={(date) => setStartDate(date)}
+              selectsStart
+              startDate={startDate}
+              endDate={endDate}
+              placeholderText="Start date"
+              customInput={<TextField variant="outlined" size="small" sx={{ minWidth: 150 }} />}
+            />
+            <Typography>-</Typography>
+            <DatePicker
+              selected={endDate}
+              onChange={(date) => setEndDate(date)}
+              selectsEnd
+              startDate={startDate}
+              endDate={endDate}
+              minDate={startDate}
+              placeholderText="End date"
+              customInput={<TextField variant="outlined" size="small" sx={{ minWidth: 150 }} />}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleFilter}
+              sx={{ px: 3, py: 1 }}
+            >
+              Filter
+            </Button>
+          </Box>
+        </Box>
 
-          {stats.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {stats.map((stat, index) => (
-                <div
-                  key={index}
-                  className="p-6 bg-white rounded-lg shadow hover:shadow-lg transition duration-300"
+        {/* Stats Cards */}
+        {stats.length > 0 ? (
+          <Grid container spacing={3} sx={{ mb: 4 }}>
+            {stats.map((stat, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}> {/* Adjusted md={4} for 3-column layout */}
+                <Card
+                  sx={{
+                    p: 2,
+                    '&:hover': { boxShadow: 6 },
+                    transition: 'box-shadow 0.3s',
+                  }}
                 >
-                  <div className="flex items-center">
-                    <div
-                      className={`p-4 rounded-full text-white ${stat.color} mr-4`}
+                  <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
+                    <IconButton
+                      sx={{ bgcolor: stat.color, color: 'white', mr: 2, p: 2 }}
                     >
                       {stat.icon}
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-700">
+                    </IconButton>
+                    <Box>
+                      <Typography variant="h6" color="textSecondary">
                         {stat.label}
-                      </h3>
-                      <p className="text-2xl font-extrabold text-gray-900">
-                        <span className="text-3xl">{stat.value}</span> Orders
-                      </p>
-                      <p className="text-md text-gray-500 mt-1">
+                      </Typography>
+                      <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                        {stat.value} Orders
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
                         Amount: {stat.amount.toLocaleString()} Rs.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p>Loading stats...</p>
-          )}
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        ) : (
+          <Typography>Loading stats...</Typography>
+        )}
 
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">
-              Sales Overview
-            </h2>
-            <Line data={salesData} options={options} />
-          </div>
-        </div>
-      </div>
-    </>
+        {/* Sales Chart */}
+        <Paper sx={{ p: 3, boxShadow: 3 }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+            Sales Overview
+          </Typography>
+          <Line data={salesData} options={options} />
+        </Paper>
+      </Container>
+    </Box>
   );
 }

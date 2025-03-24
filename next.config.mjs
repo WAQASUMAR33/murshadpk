@@ -4,7 +4,7 @@ const nextConfig = {
         remotePatterns: [
           {
             protocol: 'https',
-            hostname: 'data.tascpa.ca',
+            hostname: 'murshadpk.pkstockhelper.info',
             
           },
         ],

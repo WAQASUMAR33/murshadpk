@@ -1,5 +1,34 @@
+'use client';
 import { useState, useEffect } from 'react';
-import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
+import {
+  Box,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  CircularProgress,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
 
 const FilterableTable = ({ data, fetchData }) => {
   const [filter, setFilter] = useState('');
@@ -15,7 +44,11 @@ const FilterableTable = ({ data, fetchData }) => {
     password: '',
   });
   const [branches, setBranches] = useState([]);
+  // Pagination states
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  // Filter data based on search input
   useEffect(() => {
     setFilteredData(
       data.filter((item) =>
@@ -24,8 +57,10 @@ const FilterableTable = ({ data, fetchData }) => {
         )
       )
     );
+    setPage(0); // Reset to the first page when filter changes
   }, [filter, data]);
 
+  // Fetch branches for the dropdown
   const fetchBranches = async () => {
     try {
       const response = await fetch('/api/branches');
@@ -40,11 +75,12 @@ const FilterableTable = ({ data, fetchData }) => {
     fetchBranches();
   }, []);
 
+  // Handle adding or updating an item
   const handleAddorUpdateItem = async () => {
     setIsLoading(true);
     const method = newItem.id ? 'PUT' : 'POST';
     const url = newItem.id ? `/api/admin/${newItem.id}` : '/api/admin';
-  
+
     try {
       console.log('Request Body:', newItem); // Log the request body
       const response = await fetch(url, {
@@ -63,10 +99,12 @@ const FilterableTable = ({ data, fetchData }) => {
     } catch (error) {
       console.error('Error adding new item:', error);
       alert(`Error: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
+  // Handle deleting an item
   const handleDeleteItem = async (id) => {
     setIsLoading(true);
     try {
@@ -84,34 +122,66 @@ const FilterableTable = ({ data, fetchData }) => {
     } catch (error) {
       console.error('Error deleting item:', error);
       alert(`Error: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
+  // Handle editing an item
   const handleEditItem = (item) => {
     setNewItem(item);
     setIsModalOpen(true);
   };
 
+  // Pagination handlers
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Reset to the first page when rows per page changes
+  };
+
+  // Paginated data
+  const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <Box sx={{ bgcolor: 'grey.100', minHeight: '100vh', p: 3 }}>
+      {/* Loading Overlay */}
       {isLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="text-white text-xl">Loading...</div>
-        </div>
+        <Box
+          sx={{
+            position: 'fixed',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1300,
+          }}
+        >
+          <CircularProgress color="inherit" />
+          <Typography variant="h6" sx={{ ml: 2, color: '#fff' }}>
+            Loading...
+          </Typography>
+        </Box>
       )}
-      <div className="bg-white shadow rounded-lg p-4 relative">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">Admin Users List</h2>
-          <div className="flex space-x-2">
-            <button
-              className="text-gray-600 hover:text-gray-900 focus:outline-none"
+
+      {/* Main Content */}
+      <Paper sx={{ p: 2, borderRadius: 2, boxShadow: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'grey.800' }}>
+            Admin Users List
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <IconButton
               onClick={() => setIsSearchVisible(!isSearchVisible)}
+              sx={{ color: 'grey.600', '&:hover': { color: 'grey.900' } }}
             >
-              <MagnifyingGlassIcon className="h-6 w-6" />
-            </button>
-            <button
-              className="text-gray-600 hover:text-gray-900 focus:outline-none"
+              <SearchIcon />
+            </IconButton>
+            <IconButton
               onClick={() => {
                 setNewItem({
                   name: '',
@@ -122,140 +192,188 @@ const FilterableTable = ({ data, fetchData }) => {
                 });
                 setIsModalOpen(true);
               }}
+              sx={{ color: 'grey.600', '&:hover': { color: 'grey.900' } }}
             >
-              <PlusIcon className="h-6 w-6" />
-            </button>
-          </div>
-        </div>
+              <AddIcon />
+            </IconButton>
+          </Box>
+        </Box>
+
         {isSearchVisible && (
-          <div className="mb-4">
-            <input
-              type="text"
+          <Box sx={{ mb: 2 }}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
               placeholder="Search..."
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              InputProps={{
+                sx: { borderRadius: '8px' },
+                startAdornment: <SearchIcon sx={{ color: 'grey.600', mr: 1 }} />,
+              }}
             />
-          </div>
+          </Box>
         )}
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredData.map((item, index) => (
-                <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.branch}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.role}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <button
-                      onClick={() => handleEditItem(item)}
-                      className="text-indigo-600 hover:text-indigo-900 transition duration-150 ease-in-out">Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteItem(item.id)}
-                      className="text-red-600 hover:text-red-900 transition duration-150 ease-in-out">Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-4 w-[700px] rounded shadow-lg">
-            <h2 className="text-xl mb-4">{newItem.id ? 'Edit Admin User' : 'Add New Admin User'}</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700">Name</label>
-                  <input
-                    type="text"
-                    value={newItem.name}
-                    onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                    className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700">Branch</label>
-                  <select
-                    value={newItem.branch}
-                    onChange={(e) => setNewItem({ ...newItem, branch: e.target.value })}
-                    className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="" disabled>Select Branch</option>
-                    {branches.map((branch) => (
-                      <option key={branch.id} value={branch.title}>{branch.title}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700">Role</label>
-                  <select
-                    value={newItem.role}
-                    onChange={(e) => setNewItem({ ...newItem, role: e.target.value })}
-                    className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="" disabled>Select Role</option>
-                    <option value="employee">Employee</option>
-                    <option value="super admin">Super Admin</option>
-                    <option value="manager">Manager</option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
-                  <input
-                    type="email"
-                    value={newItem.email}
-                    onChange={(e) => setNewItem({ ...newItem, email: e.target.value })}
-                    className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700">Password</label>
-                  <input
-                    type="password"
-                    value={newItem.password}
-                    onChange={(e) => setNewItem({ ...newItem, password: e.target.value })}
-                    className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-end space-x-2 mt-4">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAddorUpdateItem}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              >
-                {newItem.id ? 'Update' : 'Add'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+        <TableContainer sx={{ maxHeight: '70vh', overflowX: 'auto' }}>
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 'bold', bgcolor: 'grey.50' }}>ID</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', bgcolor: 'grey.50' }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', bgcolor: 'grey.50' }}>Branch</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', bgcolor: 'grey.50' }}>Role</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', bgcolor: 'grey.50' }}>Email</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', bgcolor: 'grey.50' }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedData.map((item, index) => (
+                <TableRow key={item.id} sx={{ bgcolor: index % 2 === 0 ? 'white' : 'grey.50' }}>
+                  <TableCell>{item.id}</TableCell>
+                  <TableCell>{item.name}</TableCell>
+                  <TableCell>{item.branch}</TableCell>
+                  <TableCell>{item.role}</TableCell>
+                  <TableCell>{item.email}</TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <IconButton
+                        onClick={() => handleEditItem(item)}
+                        sx={{ color: 'indigo.600', '&:hover': { color: 'indigo.900' } }}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleDeleteItem(item.id)}
+                        sx={{ color: 'red.600', '&:hover': { color: 'red.900' } }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {paginatedData.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    No data found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25, { label: 'All', value: filteredData.length }]}
+          component="div"
+          count={filteredData.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+      </Paper>
+
+      {/* Add/Edit Modal */}
+      <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {newItem.id ? 'Edit Admin User' : 'Add New Admin User'}
+          <IconButton onClick={() => setIsModalOpen(false)} sx={{ color: 'grey.500' }}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+            <Box>
+              <TextField
+                fullWidth
+                label="Name"
+                value={newItem.name}
+                onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                variant="outlined"
+                size="small"
+                margin="normal"
+                InputProps={{ sx: { borderRadius: '8px' } }}
+              />
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Branch</InputLabel>
+                <Select
+                  value={newItem.branch}
+                  onChange={(e) => setNewItem({ ...newItem, branch: e.target.value })}
+                  variant="outlined"
+                  size="small"
+                  sx={{ borderRadius: '8px' }}
+                >
+                  <MenuItem value="" disabled>Select Branch</MenuItem>
+                  {branches.map((branch) => (
+                    <MenuItem key={branch.id} value={branch.title}>
+                      {branch.title}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Role</InputLabel>
+                <Select
+                  value={newItem.role}
+                  onChange={(e) => setNewItem({ ...newItem, role: e.target.value })}
+                  variant="outlined"
+                  size="small"
+                  sx={{ borderRadius: '8px' }}
+                >
+                  <MenuItem value="" disabled>Select Role</MenuItem>
+                  <MenuItem value="employee">Employee</MenuItem>
+                  <MenuItem value="super admin">Super Admin</MenuItem>
+                  <MenuItem value="manager">Manager</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            <Box>
+              <TextField
+                fullWidth
+                label="Email"
+                type="email"
+                value={newItem.email}
+                onChange={(e) => setNewItem({ ...newItem, email: e.target.value })}
+                variant="outlined"
+                size="small"
+                margin="normal"
+                InputProps={{ sx: { borderRadius: '8px' } }}
+              />
+              <TextField
+                fullWidth
+                label="Password"
+                type="password"
+                value={newItem.password}
+                onChange={(e) => setNewItem({ ...newItem, password: e.target.value })}
+                variant="outlined"
+                size="small"
+                margin="normal"
+                InputProps={{ sx: { borderRadius: '8px' } }}
+              />
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setIsModalOpen(false)}
+            sx={{ color: 'grey.600', borderRadius: '8px' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAddorUpdateItem}
+            variant="contained"
+            color="primary"
+            sx={{ borderRadius: '8px' }}
+          >
+            {newItem.id ? 'Update' : 'Add'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 

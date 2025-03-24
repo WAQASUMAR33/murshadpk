@@ -10,24 +10,26 @@ import {
   TableBody,
   Paper,
   Toolbar,
-  InputBase,
+  TextField,
   Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
   Snackbar,
   Alert,
   IconButton,
   TablePagination,
+  Box,
+  Typography,
 } from "@mui/material";
 import { useTable, useGlobalFilter, useSortBy, usePagination } from "react-table";
 import { FaUserEdit } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
 import CloseIcon from "@mui/icons-material/Close";
+import SearchIcon from "@mui/icons-material/Search";
 import Cookies from "js-cookie";
-import {jwtDecode} from "jwt-decode"; // Fix the import of jwt-decode
+import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
@@ -54,18 +56,6 @@ const BlogCategories = () => {
   const router = useRouter();
   const [userRole, setUserRole] = useState("");
 
-  // useEffect(() => {
-  //   const token = Cookies.get("token");
-  //   if (!token) {
-  //     alert("Login to see the dashboard!");
-  //     router.push("/admin");
-  //   } else {
-  //     const decodedToken = jwtDecode(token);
-  //     setUserRole(decodedToken.role);
-  //     console.log("User Role:", decodedToken.role);
-  //   }
-  // }, [router]);
-
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -85,23 +75,15 @@ const BlogCategories = () => {
   };
 
   const handleAddOpen = () => {
-    setFormData({
-      title: "",
-      description: "",
-    });
+    setFormData({ title: "", description: "" });
     setOpenAddDialog(true);
   };
 
-  const handleAddClose = () => {
-    setOpenAddDialog(false);
-  };
+  const handleAddClose = () => setOpenAddDialog(false);
 
   const handleEditOpen = (category) => {
     setEditingCategory(category);
-    setFormData({
-      title: category.title,
-      description: category.description,
-    });
+    setFormData({ title: category.title, description: category.description });
     setOpenEditDialog(true);
   };
 
@@ -112,15 +94,11 @@ const BlogCategories = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
   const handleAddSubmit = async (e) => {
     e.preventDefault();
-
     if (!formData.title || !formData.description) {
       setSnackbar({
         open: true,
@@ -129,7 +107,6 @@ const BlogCategories = () => {
       });
       return;
     }
-
     try {
       await axios.post("/api/blogcategory", formData);
       setSnackbar({
@@ -151,7 +128,6 @@ const BlogCategories = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-
     if (!formData.title || !formData.description) {
       setSnackbar({
         open: true,
@@ -160,7 +136,6 @@ const BlogCategories = () => {
       });
       return;
     }
-
     try {
       await axios.put(`/api/blogcategory/${editingCategory.id}`, formData);
       setSnackbar({
@@ -180,9 +155,7 @@ const BlogCategories = () => {
     }
   };
 
-  const handleDelete = (id) => {
-    setDeleteConfirmation({ open: true, id });
-  };
+  const handleDelete = (id) => setDeleteConfirmation({ open: true, id });
 
   const handleConfirmDelete = async () => {
     try {
@@ -205,24 +178,14 @@ const BlogCategories = () => {
     }
   };
 
-  const handleCancelDelete = () => {
+  const handleCancelDelete = () =>
     setDeleteConfirmation({ open: false, id: null });
-  };
 
   const columns = React.useMemo(
     () => [
-      {
-        Header: "ID",
-        accessor: "id",
-      },
-      {
-        Header: "Title",
-        accessor: "title",
-      },
-      {
-        Header: "Description",
-        accessor: "description",
-      },
+      { Header: "ID", accessor: "id" },
+      { Header: "Title", accessor: "title" },
+      { Header: "Description", accessor: "description" },
       {
         Header: "Created At",
         accessor: "createdAt",
@@ -237,23 +200,22 @@ const BlogCategories = () => {
         Header: "Actions",
         accessor: "actions",
         Cell: ({ row }) => (
-          <div className="flex gap-6">
-            <FaUserEdit
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <IconButton
+              color="primary"
               onClick={() => handleEditOpen(row.original)}
-              style={{
-                fontSize: "26px",
-                color: "#006a5c",
-                paddingRight: "6px",
-                cursor: "pointer",
-              }}
-            />
+            >
+              <FaUserEdit />
+            </IconButton>
             {userRole !== "sub admin" && (
-              <MdDeleteForever
+              <IconButton
+                color="error"
                 onClick={() => handleDelete(row.original.id)}
-                style={{ fontSize: "26px", color: "#b03f37", cursor: "pointer" }}
-              />
+              >
+                <MdDeleteForever />
+              </IconButton>
             )}
-          </div>
+          </Box>
         ),
       },
     ],
@@ -271,10 +233,7 @@ const BlogCategories = () => {
     gotoPage,
     setPageSize,
   } = useTable(
-    {
-      columns,
-      data: categories,
-    },
+    { columns, data: categories },
     useGlobalFilter,
     useSortBy,
     usePagination
@@ -283,32 +242,33 @@ const BlogCategories = () => {
   const { pageIndex, pageSize, globalFilter } = state;
 
   return (
-    <div style={{ padding: "20px" }}>
-      <div
-        style={{
+    <Box sx={{ p: 3 }}>
+      <Box
+        sx={{
           display: "flex",
           justifyContent: "space-between",
-          marginBottom: "20px",
+          mb: 2,
+          alignItems: "center",
         }}
       >
         <Toolbar>
-          <InputBase
+          <TextField
             value={globalFilter || ""}
             onChange={(e) => setGlobalFilter(e.target.value || undefined)}
             placeholder="Search"
-            style={{
-              padding: "6px 10px",
-              backgroundColor: "#eaeaea",
-              borderRadius: "4px",
+            variant="outlined"
+            size="small"
+            InputProps={{
+              startAdornment: <SearchIcon sx={{ mr: 1, color: "grey.500" }} />,
             }}
           />
         </Toolbar>
-        <Button variant="contained" color="primary" onClick={handleAddOpen}>
+        <Button variant="contained" onClick={handleAddOpen}>
           Add New Category
         </Button>
-      </div>
+      </Box>
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} elevation={3}>
         <Table {...getTableProps()}>
           <TableHead>
             {headerGroups.map((headerGroup) => (
@@ -319,11 +279,7 @@ const BlogCategories = () => {
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                   >
                     {column.render("Header")}
-                    {column.isSorted
-                      ? column.isSortedDesc
-                        ? " 🔽"
-                        : " 🔼"
-                      : ""}
+                    {column.isSorted ? (column.isSortedDesc ? " 🔽" : " 🔼") : ""}
                   </TableCell>
                 ))}
               </TableRow>
@@ -345,7 +301,7 @@ const BlogCategories = () => {
             {page.length === 0 && (
               <TableRow>
                 <TableCell colSpan={columns.length} align="center">
-                  No categories found.
+                  <Typography>No categories found.</Typography>
                 </TableCell>
               </TableRow>
             )}
@@ -363,24 +319,20 @@ const BlogCategories = () => {
         onRowsPerPageChange={(event) => setPageSize(Number(event.target.value))}
       />
 
-      <Dialog open={openAddDialog} onClose={handleAddClose} maxWidth="xl" fullWidth disableEnforceFocus>
-        <DialogTitle>
+      <Dialog
+        open={openAddDialog}
+        onClose={handleAddClose}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           Add New Category
-          <IconButton
-            aria-label="close"
-            onClick={handleAddClose}
-            sx={{
-              position: "absolute",
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
-          >
+          <IconButton onClick={handleAddClose}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          <form onSubmit={handleAddSubmit}>
+          <Box component="form" onSubmit={handleAddSubmit} sx={{ mt: 1 }}>
             <TextField
               label="Title"
               name="title"
@@ -402,35 +354,29 @@ const BlogCategories = () => {
               rows={4}
             />
             <DialogActions>
-              <Button onClick={handleAddClose} color="primary">
-                Cancel
-              </Button>
-              <Button type="submit" color="primary" variant="contained">
+              <Button onClick={handleAddClose}>Cancel</Button>
+              <Button type="submit" variant="contained">
                 Save
               </Button>
             </DialogActions>
-          </form>
+          </Box>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={openEditDialog} onClose={handleEditClose} maxWidth="xl" fullWidth disableEnforceFocus>
-        <DialogTitle>
+      <Dialog
+        open={openEditDialog}
+        onClose={handleEditClose}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           Edit Category
-          <IconButton
-            aria-label="close"
-            onClick={handleEditClose}
-            sx={{
-              position: "absolute",
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
-          >
+          <IconButton onClick={handleEditClose}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          <form onSubmit={handleEditSubmit}>
+          <Box component="form" onSubmit={handleEditSubmit} sx={{ mt: 1 }}>
             <TextField
               label="Title"
               name="title"
@@ -452,39 +398,31 @@ const BlogCategories = () => {
               rows={4}
             />
             <DialogActions>
-              <Button onClick={handleEditClose} color="primary">
-                Cancel
-              </Button>
-              <Button type="submit" color="primary" variant="contained">
+              <Button onClick={handleEditClose}>Cancel</Button>
+              <Button type="submit" variant="contained">
                 Update
               </Button>
             </DialogActions>
-          </form>
+          </Box>
         </DialogContent>
       </Dialog>
 
       <Dialog
         open={deleteConfirmation.open}
         onClose={handleCancelDelete}
-        aria-labelledby="delete-confirmation-title"
-        aria-describedby="delete-confirmation-description"
       >
-        <DialogTitle id="delete-confirmation-title">
-          Confirm Deletion
-        </DialogTitle>
+        <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           {deleteConfirmation.id && (
-            <p>
+            <Typography>
               Are you sure you want to delete the category with ID{" "}
               {deleteConfirmation.id}?
-            </p>
+            </Typography>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancelDelete} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmDelete} color="secondary">
+          <Button onClick={handleCancelDelete}>Cancel</Button>
+          <Button onClick={handleConfirmDelete} color="error">
             Confirm
           </Button>
         </DialogActions>
@@ -504,7 +442,7 @@ const BlogCategories = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 };
 
