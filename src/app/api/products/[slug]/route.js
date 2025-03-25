@@ -101,31 +101,49 @@ export async function GET(request, { params }) {
       );
     }
 
-    // Parse colors and sizes from JSON strings
-    const colorIds = JSON.parse(product.colors || '[]');
-    const sizeIds = JSON.parse(product.sizes || '[]');
+    // Parse colors and sizes from JSON strings with validation
+    let colorIds = [];
+    let sizeIds = [];
+    
+    try {
+      colorIds = product.colors ? JSON.parse(product.colors) : [];
+      sizeIds = product.sizes ? JSON.parse(product.sizes) : [];
+    } catch (parseError) {
+      console.error('Error parsing colors or sizes:', parseError);
+      // Fallback to empty arrays if parsing fails
+      colorIds = [];
+      sizeIds = [];
+    }
 
-    // Fetch color and size details
-    const colors = await prisma.color.findMany({
-      where: {
-        id: { in: colorIds },
-      },
-      select: {
-        name: true,
-        hex: true,
-      },
-    });
+    // Ensure colorIds and sizeIds are arrays of integers
+    colorIds = Array.isArray(colorIds) ? colorIds.map(id => parseInt(id, 10)).filter(id => !isNaN(id)) : [];
+    sizeIds = Array.isArray(sizeIds) ? sizeIds.map(id => parseInt(id, 10)).filter(id => !isNaN(id)) : [];
 
-    const sizes = await prisma.size.findMany({
-      where: {
-        id: { in: sizeIds },
-      },
-      select: {
-        name: true,
-      },
-    });
+    // Fetch color and size details only if there are valid IDs
+    const colors = colorIds.length > 0
+      ? await prisma.color.findMany({
+          where: {
+            id: { in: colorIds },
+          },
+          select: {
+            name: true,
+            hex: true,
+          },
+        })
+      : [];
 
-    // Fetch related products (customize the logic as needed)
+    const sizes = sizeIds.length > 0
+      ? await prisma.size.findMany({
+          where: {
+            id: { in: sizeIds },
+          },
+          select: {
+            name: true,
+          },
+        })
+      : [];
+
+    // Fetch related products
     const relatedProducts = await prisma.product.findMany({
       where: {
         subcategorySlug: product.subcategorySlug,
@@ -156,6 +174,88 @@ export async function GET(request, { params }) {
     );
   }
 }
+
+
+
+// export async function GET(request, { params }) {
+//   const { slug } = params; // Use slug parameter
+
+//   try {
+//     // Fetch the product by slug
+//     const product = await prisma.product.findUnique({
+//       where: { slug },
+//       include: {
+//         images: true,
+//         subcategory: {
+//           include: {
+//             category: true,
+//           },
+//         },
+//       },
+//     });
+
+//     if (!product) {
+//       return NextResponse.json(
+//         { message: 'Product not found.' },
+//         { status: 404 }
+//       );
+//     }
+
+//     // Parse colors and sizes from JSON strings
+//     const colorIds = JSON.parse(product.colors || '[]');
+//     const sizeIds = JSON.parse(product.sizes || '[]');
+
+//     // Fetch color and size details
+//     const colors = await prisma.color.findMany({
+//       where: {
+//         id: { in: colorIds },
+//       },
+//       select: {
+//         name: true,
+//         hex: true,
+//       },
+//     });
+
+//     const sizes = await prisma.size.findMany({
+//       where: {
+//         id: { in: sizeIds },
+//       },
+//       select: {
+//         name: true,
+//       },
+//     });
+
+//     // Fetch related products (customize the logic as needed)
+//     const relatedProducts = await prisma.product.findMany({
+//       where: {
+//         subcategorySlug: product.subcategorySlug,
+//         NOT: { slug: product.slug }, // Exclude the current product
+//       },
+//       take: 6, // Limit to 6 related products
+//       include: {
+//         images: true,
+//       },
+//     });
+
+//     return NextResponse.json(
+//       {
+//         data: {
+//           product,
+//           colors,
+//           sizes,
+//           relatedProducts,
+//         },
+//       },
+//       { status: 200 }
+//     );
+//   } catch (error) {
+//     console.error('Error fetching product:', error);
+//     return NextResponse.json(
+//       { message: 'Internal Server Error' },
+//       { status: 500 }
+//     );
+//   }
+// }
 
 
 export async function DELETE(request, { params }) {
