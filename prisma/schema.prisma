@@ -78,7 +78,7 @@ model Product {
   id              Int          @id @default(autoincrement())
   name            String
   slug            String       @unique  // Adding slug field with uniqueness constraint
-  description     String
+  description     @LongText
   discount        Float?
   isTopRated      Boolean?
   price           Float
