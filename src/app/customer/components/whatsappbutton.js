@@ -19,7 +19,7 @@ const totalQuantityOfItems = cart.reduce((total, item) => total + item.quantity,
   const [cartVisible, setCartVisible] = useState(false);
 
   const handleClick = () => {
-    const url = `https://wa.me/${phoneNumber}?text=Hello%Store2u.ca`;
+    const url = `https://wa.me/${phoneNumber}?text=Hello%MurshadPk.com`;
     window.open(url, '_blank');
   };
 

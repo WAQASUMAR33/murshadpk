@@ -27,7 +27,7 @@ const About = () => {
     <>
     {(aboutData)?(<>
       <Head>
-         <title>{aboutData.Title} - Store2u.ca</title>
+         <title>{aboutData.Title} - murshadpk.com</title>
           <meta name="description" content={`${aboutData.description}`} />
        
       </Head>

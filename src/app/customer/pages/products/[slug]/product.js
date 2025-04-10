@@ -35,7 +35,7 @@ const ProductPage = ({ productData }) => {
   const [reviewLoading, setReviewLoading] = useState(false);
   const [linkshare, setLinkShare] = useState(false);
 
-  const ProductLink = `https://www.store2u.ca/customer/pages/products/${product.slug}`;
+  const ProductLink = `https://www.murshadpk.com/customer/pages/products/${product.slug}`;
   const prevcart = useSelector((state) => state.cart.items);
 
   const handlelinkshare = () => {

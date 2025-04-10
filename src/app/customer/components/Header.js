@@ -198,7 +198,7 @@ useEffect(() => {
         if (data) {
           setcompanyName(data.name);
           setcompanyHeaderImage(data.headerImage);
-          setcompanyicon(data.favIcon);
+          setcompanyicon("/login.png");
         }
       } catch (error) {
         console.error('Error fetching company details:', error);

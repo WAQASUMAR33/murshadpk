@@ -118,12 +118,12 @@ const Sidebar = ({ setActiveComponent }) => {
         <Image
           width={100}
           height={100}
-          src="/store2ulogo.png"
+          src="/logo.png"
           alt="Profile"
           style={{ borderRadius: "4px", padding: "8px", margin: "0 auto", backgroundColor: "white" }}
         />
         <Typography variant="h6" sx={{ mt: 1, fontWeight: "bold", fontSize: "1.1rem" }}>
-          Store2u
+          Murshad Pk
         </Typography>
         <Typography variant="body2" sx={{ color: "#4ade80", fontSize: "0.8rem" }}>
           ● Online

@@ -16,10 +16,7 @@ export async function POST(request) {
             }
         });
 
-        // if (status === "") {
-        //     // return NextResponse.json(order, { status: 200 });
-        //     return NextResponse.redirect(`https://www.store2u.ca/paymentfailed`);
-        // }
+    
 
         return NextResponse.json(order, { status: 200 });
     } catch (error) {

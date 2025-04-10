@@ -2,7 +2,6 @@
 
 import { Poppins } from 'next/font/google';
 import { Provider } from 'react-redux';
-
 import store from './store/store';
 import './globals.css';
 import WhatsAppButton from './customer/components/whatsappbutton';

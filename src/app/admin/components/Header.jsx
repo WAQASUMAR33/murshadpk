@@ -57,7 +57,7 @@ const Header = () => {
               style={{ borderRadius: '50%' }}
             /> */}
             <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', ml: 1 }}>
-              Store2u
+              Murshad PK
             </Typography>
           </Box>
         </Box>

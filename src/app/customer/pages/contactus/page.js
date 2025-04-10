@@ -69,7 +69,7 @@ const Contact = () => {
       {contactUsData ? (
         <>
           <Head>
-            <title>{contactUsData.Title} - Store2u.ca</title>
+            <title>{contactUsData.Title} - murshadpk.com</title>
             <meta name="description" content={contactUsData.description} />
           </Head>
           <div className="py-12 px-10 max-w-7xl mx-auto">

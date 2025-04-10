@@ -1,6 +1,5 @@
 'use client'
 import React from 'react';
-
 import TopCategories from './customer/components/TopCategories';
 import Products from './customer/components/Products';
 import Features from './customer/components/Features';
@@ -19,11 +18,7 @@ export default function CustomerPage () {
     
     <Customerlayout>
     <div>
-      
-      
-    
       <Slider/>
-     
       <main className="p-4">
       <TopCategories/>
         <AllProducts/>
@@ -33,7 +28,6 @@ export default function CustomerPage () {
         <NewArrivals/>
         {/* <CategoryProductsComponent/> */}
         <FaqSection/>
-        
       </main>
     </div>
     </Customerlayout>
