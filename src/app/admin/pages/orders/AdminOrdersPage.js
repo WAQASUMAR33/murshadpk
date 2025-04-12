@@ -268,7 +268,7 @@ const AdminOrdersPage = () => {
                 </Typography>
                 <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1, color: 'grey.600' }}>
                   <Typography>
-                    Address: {order.streetAddress}, {order.apartmentSuite}, {order.city}, {order.state}, {order.zip}, {order.country}
+                    Address: {order.streetAddress}, {order.apartmentSuite}, {order.city}, {order.state}, {order.zip}, {order.country} , {order.phoneNumber}
                   </Typography>
                   <Typography>Email address: {order.email}</Typography>
                 </Box>

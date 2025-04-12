@@ -8,7 +8,7 @@ import { removeFromCart, updateQuantity, setCart } from '../../store/cartSlice';
 import Image from 'next/image';
 
 export default function WhatsAppButton() {
-  const phoneNumber = '92310356111';
+  const phoneNumber = '923356768338';
   const router = useRouter();
   const dispatch = useDispatch();
   const cart = useSelector(state => state.cart.items);
